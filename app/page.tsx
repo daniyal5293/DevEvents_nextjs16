@@ -2,14 +2,15 @@ import EventBtn from "@/components/EventBtn";
 import EventCard from "@/components/EventCard";
 import { IEvent } from "@/database";
 import { cacheLife } from "next/cache";
+import { events } from "@/lib/constant";
 
 const BASE_URL = process.env.BASE_URL;
 
 const Home = async () => {
   'use cache'
   cacheLife('hours');
-  const response = await fetch(`${BASE_URL}/api/events`);
-  const { events } = await response.json();
+  // const response = await fetch(`${BASE_URL}/api/events`);
+  // const { events } = await response.json();
 
 
   return (
@@ -19,12 +20,11 @@ const Home = async () => {
 
       <EventBtn />
 
-
-      <div className="mt-20 space-y-7"  >
+      <div className="mt-20 space-y-7">
         <h3>Feature Events</h3>
 
         <ul className="events">
-          {events.map((event: IEvent) => 
+          {events.map((event: IEvent) =>
           <li key={event.title} className="list-none">
             <EventCard {...event} />
           </li>
