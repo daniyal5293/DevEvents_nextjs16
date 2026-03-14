@@ -1,4 +1,5 @@
 import CreateEventForm from '@/components/CreateEventForm';
+import { Suspense } from 'react';
 
 export const metadata = {
   title: 'Create Event - DevEvents',
@@ -7,8 +8,8 @@ export const metadata = {
 
 export default function CreateEventPage() {
   return (
-    <section>
-      <CreateEventForm />
-    </section>
+      <Suspense fallback={<div>Loading...</div>}>
+         <CreateEventForm />
+      </Suspense>
   );
 }
