@@ -8,8 +8,12 @@ export const metadata = {
 
 export default function CreateEventPage() {
   return (
+      
+        <main>
       <Suspense fallback={<div>Loading...</div>}>
          <CreateEventForm />
       </Suspense>
+        </main>
+  
   );
 }
