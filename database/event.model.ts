@@ -151,29 +151,52 @@ function normalizeDate(dateString: string): string {
 
 // Helper function to normalize time format
 function normalizeTime(timeString: string): string {
-  // Handle various time formats and convert to HH:MM (24-hour format)
-  const timeRegex = /^(\d{1,2}):(\d{2})(\s*(AM|PM))?$/i;
-  const match = timeString.trim().match(timeRegex);
+  const singleTimeRegex = /^(\d{1,2}):(\d{2})(\s*(AM|PM))?$/i;
+  const timeRangeRegex = /^(\d{1,2}):(\d{2})(\s*(AM|PM))?\s*-\s*(\d{1,2}):(\d{2})(\s*(AM|PM))?$/i;
   
-  if (!match) {
-    throw new Error('Invalid time format. Use HH:MM or HH:MM AM/PM');
+  const timeString_trimmed = timeString.trim();
+  let rangeMatch = timeString_trimmed.match(timeRangeRegex);
+  let singleMatch = timeString_trimmed.match(singleTimeRegex);
+  
+  // Helper to convert time parts
+  const parseTime = (hours: number, minutes: string, period?: string): string => {
+    let h = hours;
+    if (period) {
+      if (period.toUpperCase() === 'PM' && h !== 12) h += 12;
+      if (period.toUpperCase() === 'AM' && h === 12) h = 0;
+    }
+    
+    if (h < 0 || h > 23 || parseInt(minutes) < 0 || parseInt(minutes) > 59) {
+      throw new Error('Invalid time values');
+    }
+    
+    return `${h.toString().padStart(2, '0')}:${minutes}`;
+  };
+  
+  if (rangeMatch) {
+    // Handle time range
+    const startHours = parseInt(rangeMatch[1]);
+    const startMinutes = rangeMatch[2];
+    const startPeriod = rangeMatch[4];
+    
+    const endHours = parseInt(rangeMatch[5]);
+    const endMinutes = rangeMatch[6];
+    const endPeriod = rangeMatch[8];
+    
+    const startTime = parseTime(startHours, startMinutes, startPeriod);
+    const endTime = parseTime(endHours, endMinutes, endPeriod);
+    
+    return `${startTime} - ${endTime}`;
+  } else if (singleMatch) {
+    // Handle single time
+    const hours = parseInt(singleMatch[1]);
+    const minutes = singleMatch[2];
+    const period = singleMatch[4];
+    
+    return parseTime(hours, minutes, period);
+  } else {
+    throw new Error('Invalid time format. Use HH:MM, HH:MM AM/PM, or HH:MM AM/PM - HH:MM AM/PM');
   }
-  
-  let hours = parseInt(match[1]);
-  const minutes = match[2];
-  const period = match[4]?.toUpperCase();
-  
-  if (period) {
-    // Convert 12-hour to 24-hour format
-    if (period === 'PM' && hours !== 12) hours += 12;
-    if (period === 'AM' && hours === 12) hours = 0;
-  }
-  
-  if (hours < 0 || hours > 23 || parseInt(minutes) < 0 || parseInt(minutes) > 59) {
-    throw new Error('Invalid time values');
-  }
-  
-  return `${hours.toString().padStart(2, '0')}:${minutes}`;
 }
 
 // Create unique index on slug for better performance
